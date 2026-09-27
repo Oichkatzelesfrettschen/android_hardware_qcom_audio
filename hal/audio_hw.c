@@ -2956,6 +2956,16 @@ static int adev_open_output_stream(struct audio_hw_device *dev,
             ret = -EINVAL;
             goto error_open;
         }
+        /* A plain DIRECT PCM output carries its stream description in config
+         * and leaves offload_info at AUDIO_INFO_INITIALIZER, whose format is
+         * AUDIO_FORMAT_DEFAULT; the direct-PCM path below reads offload_info,
+         * so it takes format, rate and mask from config. */
+        if (!(out->flags & AUDIO_OUTPUT_FLAG_COMPRESS_OFFLOAD) &&
+                config->offload_info.format == AUDIO_FORMAT_DEFAULT) {
+            config->offload_info.format = config->format;
+            config->offload_info.sample_rate = config->sample_rate;
+            config->offload_info.channel_mask = config->channel_mask;
+        }
         if (!is_supported_format(config->offload_info.format) &&
                 !audio_extn_is_dolby_format(config->offload_info.format)) {
             ALOGE("%s: Unsupported audio format %x " , __func__, config->offload_info.format);
