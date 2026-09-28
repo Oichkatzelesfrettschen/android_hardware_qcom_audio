@@ -140,6 +140,7 @@ struct platform_data {
     void                       *acdb_handle;
     int                        voice_feature_set;
     acdb_init_t                acdb_init;
+    bool                       acdb_initialized;
     acdb_deallocate_t          acdb_deallocate;
     acdb_send_audio_cal_t      acdb_send_audio_cal;
     acdb_send_voice_cal_t      acdb_send_voice_cal;
@@ -1044,7 +1045,7 @@ void *platform_init(struct audio_device *adev)
         if (my_data->acdb_init == NULL)
             ALOGE("%s: dlsym error %s for acdb_loader_init_ACDB", __func__, dlerror());
         else
-            my_data->acdb_init();
+            my_data->acdb_initialized = my_data->acdb_init() == 0;
     }
 
     set_platform_defaults(my_data);
@@ -1090,6 +1091,25 @@ void platform_deinit(void *platform)
     free(platform);
     /* deinit usb */
     audio_extn_usb_deinit();
+}
+
+void platform_snd_card_update(void *platform, card_status_t card_status)
+{
+    struct platform_data *my_data = (struct platform_data *)platform;
+
+    if (card_status == CARD_STATUS_OFFLINE) {
+        my_data->acdb_initialized = false;
+        return;
+    }
+
+    if (card_status == CARD_STATUS_ONLINE && !my_data->acdb_initialized &&
+        my_data->acdb_init) {
+        int result = my_data->acdb_init();
+        if (result == 0)
+            my_data->acdb_initialized = true;
+        else
+            ALOGE("%s: ACDB reinitialization failed: %d", __func__, result);
+    }
 }
 
 const char *platform_get_snd_device_name(snd_device_t snd_device)
