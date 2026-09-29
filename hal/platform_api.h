@@ -29,6 +29,7 @@ enum card_status_t;
 
 void *platform_init(struct audio_device *adev);
 void platform_deinit(void *platform);
+void platform_snd_card_update(void *platform, enum card_status_t card_status);
 const char *platform_get_snd_device_name(snd_device_t snd_device);
 int platform_get_snd_device_name_extn(void *platform, snd_device_t snd_device,
                                       char *device_name);
