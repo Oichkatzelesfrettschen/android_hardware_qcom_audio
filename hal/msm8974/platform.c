@@ -2078,6 +2078,17 @@ int platform_set_parameters(void *platform, struct str_parms *parms)
             audio_route_update_mixer(my_data->adev->audio_route);
         }
     }
+
+    /* The Bluetooth stack reports the negotiated HFP codec as bt_wbs: on for
+     * mSBC (16 kHz), off for CVSD (8 kHz). The SCO sound devices follow
+     * btsco_sample_rate, and their bt-sco-wb mixer paths set the internal
+     * BTSCO port to 16 kHz, so the port rate matches the codec on the air. */
+    err = str_parms_get_str(parms, AUDIO_PARAMETER_KEY_BT_SCO_WB, value, sizeof(value));
+    if (err >= 0) {
+        str_parms_del(parms, AUDIO_PARAMETER_KEY_BT_SCO_WB);
+        my_data->btsco_sample_rate = strcmp(value, AUDIO_PARAMETER_VALUE_ON) == 0 ?
+                SAMPLE_RATE_16KHZ : SAMPLE_RATE_8KHZ;
+    }
 #endif
 
     err = str_parms_get_str(parms, AUDIO_PARAMETER_KEY_SLOWTALK, value, sizeof(value));
