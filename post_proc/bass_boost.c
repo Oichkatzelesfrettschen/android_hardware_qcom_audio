@@ -74,7 +74,6 @@ int bassboost_get_parameter(effect_context_t *context, effect_param_t *p,
     int32_t *param_tmp = (int32_t *)p->data;
     int32_t param = *param_tmp++;
     void *value = p->data + voffset;
-    int i;
 
     ALOGV("%s: ctxt %p, param %d", __func__, bass_ctxt, param);
 
@@ -184,9 +183,8 @@ int bassboost_set_device(effect_context_t *context, uint32_t device)
     return 0;
 }
 
-int bassboost_reset(effect_context_t *context)
+int bassboost_reset(effect_context_t *context __unused)
 {
-    bassboost_context_t *bass_ctxt = (bassboost_context_t *)context;
 
     return 0;
 }

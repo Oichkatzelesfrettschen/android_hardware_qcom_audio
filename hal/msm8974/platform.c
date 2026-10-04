@@ -622,9 +622,6 @@ static void set_echo_reference(struct audio_device *adev, bool enable)
 }
 #ifdef PLATFORM_APQ8084
 static struct csd_data *open_csd_client(bool i2s_ext_modem)
-#else
-static struct csd_data *open_csd_client()
-#endif
 {
     struct csd_data *csd = calloc(1, sizeof(struct csd_data));
 
@@ -754,11 +751,7 @@ static struct csd_data *open_csd_client()
                   __func__, dlerror());
             goto error;
         } else {
-#ifdef PLATFORM_APQ8084
             csd->init(i2s_ext_modem);
-#else
-            csd->init();
-#endif
         }
     }
     return csd;
@@ -768,6 +761,7 @@ error:
     csd = NULL;
     return csd;
 }
+#endif
 
 void close_csd_client(struct csd_data *csd)
 {
@@ -894,8 +888,6 @@ static void initialize_huawei_sound_param_path(void *acdb_handle)
 
 void *platform_init(struct audio_device *adev)
 {
-    char platform[PROPERTY_VALUE_MAX];
-    char baseband[PROPERTY_VALUE_MAX];
     char value[PROPERTY_VALUE_MAX];
     struct platform_data *my_data = NULL;
     int retry_num = 0, snd_card_num = 0;
@@ -2046,7 +2038,6 @@ static int platform_set_slowtalk(struct platform_data *my_data, bool state)
 int platform_set_parameters(void *platform, struct str_parms *parms)
 {
     struct platform_data *my_data = (struct platform_data *)platform;
-    char *str;
     char value[256] = {0};
     int val;
     int ret = 0, err;
@@ -2232,7 +2223,6 @@ void platform_get_parameters(void *platform,
                             struct str_parms *reply)
 {
     struct platform_data *my_data = (struct platform_data *)platform;
-    char *str = NULL;
     char value[256] = {0};
     int ret;
     char *kv_pairs = NULL;
@@ -2525,7 +2515,6 @@ bool platform_check_codec_backend_cfg(struct audio_device* adev,
 {
     bool backend_change = false;
     struct listnode *node;
-    struct stream_out *out = NULL;
     unsigned int bit_width = CODEC_BACKEND_DEFAULT_BIT_WIDTH;
     unsigned int sample_rate = CODEC_BACKEND_DEFAULT_SAMPLE_RATE;
 
