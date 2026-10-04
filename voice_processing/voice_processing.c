@@ -139,14 +139,6 @@ static const effect_uuid_t * uuid_to_id_table[NUM_ID];
 // Helper functions
 //------------------------------------------------------------------------------
 
-static const effect_uuid_t * id_to_uuid(int id)
-{
-    if (id >= NUM_ID)
-        return EFFECT_UUID_NULL;
-
-    return uuid_to_id_table[id];
-}
-
 static uint32_t uuid_to_id(const effect_uuid_t * uuid)
 {
     size_t i;
@@ -333,7 +325,6 @@ static int session_release_effect(struct session_s *session,
 
 static int session_set_config(struct session_s *session, effect_config_t *config)
 {
-    int status;
 
     if (config->inputCfg.samplingRate != config->outputCfg.samplingRate ||
             config->inputCfg.format != config->outputCfg.format ||
@@ -392,8 +383,6 @@ static void session_set_fx_enabled(struct session_s *session, uint32_t id, bool 
 
 static struct session_s *get_session(int32_t id, int32_t  sessionId, int32_t  ioId)
 {
-    size_t i;
-    int free = -1;
     struct listnode *node;
     struct session_s *session;
 
@@ -759,11 +748,11 @@ static int lib_get_descriptor(const effect_uuid_t *uuid,
 // This is the only symbol that needs to be exported
 __attribute__ ((visibility ("default")))
 audio_effect_library_t AUDIO_EFFECT_LIBRARY_INFO_SYM = {
-    tag : AUDIO_EFFECT_LIBRARY_TAG,
-    version : EFFECT_LIBRARY_API_VERSION,
-    name : "MSM8960 Audio Preprocessing Library",
-    implementor : "The Android Open Source Project",
-    create_effect : lib_create,
-    release_effect : lib_release,
-    get_descriptor : lib_get_descriptor
+    .tag = AUDIO_EFFECT_LIBRARY_TAG,
+    .version = EFFECT_LIBRARY_API_VERSION,
+    .name = "MSM8960 Audio Preprocessing Library",
+    .implementor = "The Android Open Source Project",
+    .create_effect = lib_create,
+    .release_effect = lib_release,
+    .get_descriptor = lib_get_descriptor
 };

@@ -386,7 +386,6 @@ int reverb_get_parameter(effect_context_t *context, effect_param_t *p,
     int32_t param = *param_tmp++;
     void *value = p->data + voffset;
     reverb_settings_t *reverb_settings;
-    int i;
 
     ALOGV("%s: ctxt %p, param %d", __func__, reverb_ctxt, param);
 
@@ -608,9 +607,8 @@ int reverb_set_device(effect_context_t *context, uint32_t device)
     return 0;
 }
 
-int reverb_reset(effect_context_t *context)
+int reverb_reset(effect_context_t *context __unused)
 {
-    reverb_context_t *reverb_ctxt = (reverb_context_t *)context;
 
     return 0;
 }

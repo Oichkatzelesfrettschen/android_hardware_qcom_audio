@@ -246,9 +246,6 @@ done:
 static void start_tag(void *userdata __unused, const XML_Char *tag_name,
                       const XML_Char **attr)
 {
-    const XML_Char              *attr_name = NULL;
-    const XML_Char              *attr_value = NULL;
-    unsigned int                i;
 
     if (strcmp(tag_name, "acdb_ids") == 0) {
         section = ACDB;

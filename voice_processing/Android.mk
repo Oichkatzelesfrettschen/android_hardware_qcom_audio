@@ -22,6 +22,6 @@ LOCAL_SHARED_LIBRARIES := \
 LOCAL_SHARED_LIBRARIES += libdl
 
 LOCAL_CFLAGS += -fvisibility=hidden
-LOCAL_CFLAGS += -Wno-error
+LOCAL_CFLAGS += -Wall -Wextra -Werror
 
 include $(BUILD_SHARED_LIBRARY)

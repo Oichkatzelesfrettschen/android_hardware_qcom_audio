@@ -238,8 +238,6 @@ static struct audio_device *adev = NULL;
 static pthread_mutex_t adev_init_lock;
 static unsigned int audio_device_ref_count;
 
-static int set_voice_volume_l(struct audio_device *adev, float volume);
-
 static amplifier_device_t * get_amplifier_device(void)
 {
     if (adev)
@@ -332,6 +330,7 @@ static int amplifier_input_stream_start(struct audio_stream_in *stream)
     return 0;
 }
 
+#ifdef SND_MONITOR_ENABLED
 static int parse_snd_card_status(struct str_parms *parms, int *card,
                                  card_status_t *status)
 {
@@ -351,6 +350,7 @@ static int parse_snd_card_status(struct str_parms *parms, int *card,
                                          CARD_STATUS_OFFLINE;
     return 0;
 }
+#endif
 
 static int amplifier_output_stream_standby(struct audio_stream_out *stream)
 {
@@ -884,7 +884,6 @@ int select_devices(struct audio_device *adev, audio_usecase_t uc_id)
     struct audio_usecase *voip_usecase = NULL;
     struct audio_usecase *hfp_usecase = NULL;
     audio_usecase_t hfp_ucid;
-    struct listnode *node;
     int status = 0;
 
     usecase = get_usecase_from_list(adev, uc_id);
@@ -1032,7 +1031,7 @@ int select_devices(struct audio_device *adev, audio_usecase_t uc_id)
 
 static int stop_input_stream(struct stream_in *in)
 {
-    int i, ret = 0;
+    int ret = 0;
     struct audio_usecase *uc_info;
     struct audio_device *adev = in->dev;
 
@@ -1484,7 +1483,7 @@ static int check_and_set_hdmi_channels(struct audio_device *adev,
 
 static int stop_output_stream(struct stream_out *out)
 {
-    int i, ret = 0;
+    int ret = 0;
     struct audio_usecase *uc_info;
     struct audio_device *adev = out->dev;
 
@@ -1923,6 +1922,7 @@ static bool output_drives_call(struct audio_device *adev, struct stream_out *out
     return out == adev->primary_output || out == adev->voice_tx_output;
 }
 
+#ifdef SND_MONITOR_ENABLED
 // note: this call is safe only if the stream_cb is
 // removed first in close_output_stream (as is done now).
 static void out_snd_mon_cb(void * stream, struct str_parms * parms)
@@ -1959,17 +1959,15 @@ static void out_snd_mon_cb(void * stream, struct str_parms * parms)
 
     return;
 }
+#endif
 
 static int out_set_parameters(struct audio_stream *stream, const char *kvpairs)
 {
     struct stream_out *out = (struct stream_out *)stream;
     struct audio_device *adev = out->dev;
-    struct audio_usecase *usecase;
-    struct listnode *node;
     struct str_parms *parms;
     char value[32];
-    int ret = 0, val = 0, err;
-    bool select_new_device = false;
+    int val = 0, err;
     int status = 0;
 
     ALOGD("%s: enter: usecase(%d: %s) kvpairs: %s",
@@ -2020,7 +2018,7 @@ static int out_set_parameters(struct audio_stream *stream, const char *kvpairs)
                     output_drives_call(adev, out)) {
                 adev->current_call_output = out;
                 if (!adev->voice.in_call)
-                    ret = voice_start_call(adev);
+                    voice_start_call(adev);
                 else
                     voice_update_devices_for_all_voice_usecases(adev);
              }
@@ -2032,7 +2030,7 @@ static int out_set_parameters(struct audio_stream *stream, const char *kvpairs)
         if ((adev->mode == AUDIO_MODE_NORMAL) &&
                 adev->voice.in_call &&
                 output_drives_call(adev, out)) {
-            ret = voice_stop_call(adev);
+            voice_stop_call(adev);
             adev->current_call_output = NULL;
         }
 
@@ -2050,7 +2048,7 @@ static int out_set_parameters(struct audio_stream *stream, const char *kvpairs)
     }
     if (is_offload_usecase(out->usecase)) {
         pthread_mutex_lock(&out->lock);
-        ret = parse_compress_metadata(out, parms);
+        parse_compress_metadata(out, parms);
         pthread_mutex_unlock(&out->lock);
     }
 
@@ -2579,6 +2577,7 @@ static int in_dump(const struct audio_stream *stream __unused,
     return 0;
 }
 
+#ifdef SND_MONITOR_ENABLED
 static void in_snd_mon_cb(void * stream, struct str_parms * parms)
 {
     if (!stream || !parms)
@@ -2615,13 +2614,13 @@ static void in_snd_mon_cb(void * stream, struct str_parms * parms)
 
     return;
 }
+#endif
 
 static int in_set_parameters(struct audio_stream *stream, const char *kvpairs)
 {
     struct stream_in *in = (struct stream_in *)stream;
     struct audio_device *adev = in->dev;
     struct str_parms *parms;
-    char *str;
     char value[32];
     int ret = 0, val = 0, err;
     int status = 0;
@@ -2665,7 +2664,6 @@ static int in_set_parameters(struct audio_stream *stream, const char *kvpairs)
         }
     }
 
-done:
     pthread_mutex_unlock(&adev->lock);
     pthread_mutex_unlock(&in->lock);
 
@@ -2680,7 +2678,6 @@ static char* in_get_parameters(const struct audio_stream *stream,
     struct stream_in *in = (struct stream_in *)stream;
     struct str_parms *query = str_parms_create_str(keys);
     char *str;
-    char value[256];
     struct str_parms *reply = str_parms_create();
 
     if (!query || !reply) {
@@ -2711,7 +2708,7 @@ static ssize_t in_read(struct audio_stream_in *stream, void *buffer,
 {
     struct stream_in *in = (struct stream_in *)stream;
     struct audio_device *adev = in->dev;
-    int i, ret = -1;
+    int ret = -1;
 
     lock_input_stream(in);
 
@@ -2870,7 +2867,7 @@ static int adev_open_output_stream(struct audio_hw_device *dev,
 {
     struct audio_device *adev = (struct audio_device *)dev;
     struct stream_out *out;
-    int i, ret = 0;
+    int ret = 0;
 
     *stream_out = NULL;
 
@@ -3268,7 +3265,6 @@ static int adev_set_parameters(struct audio_hw_device *dev, const char *kvpairs)
 {
     struct audio_device *adev = (struct audio_device *)dev;
     struct str_parms *parms;
-    char *str;
     char value[32];
     int val;
     int ret;
@@ -3356,8 +3352,6 @@ static char* adev_get_parameters(const struct audio_hw_device *dev,
     struct str_parms *reply = str_parms_create();
     struct str_parms *query = str_parms_create_str(keys);
     char *str;
-    char value[256] = {0};
-    int ret = 0;
 
     if (!query || !reply) {
         ALOGE("adev_get_parameters: failed to create query or reply");
@@ -3371,7 +3365,6 @@ static char* adev_get_parameters(const struct audio_hw_device *dev,
     platform_get_parameters(adev->platform, query, reply);
     pthread_mutex_unlock(&adev->lock);
 
-exit:
     str = str_parms_to_str(reply);
     str_parms_destroy(query);
     str_parms_destroy(reply);
@@ -3705,7 +3698,6 @@ static int adev_verify_devices(struct audio_device *adev)
     size_t i;
     unsigned dir;
     const unsigned card_id = adev->snd_card;
-    char info[512]; /* for possible debug info */
 
     for (dir = 0; dir < 2; ++dir) {
         const usecase_type_t usecase_type = usecase_type_by_dir[dir];
@@ -3720,7 +3712,6 @@ static int adev_verify_devices(struct audio_device *adev)
         for (i = 0; i < testsize; ++i) {
             const audio_usecase_t audio_usecase = testcases[i];
             int device_id;
-            snd_device_t snd_device;
             struct pcm_params **pparams;
             struct stream_out out;
             struct stream_in in;
@@ -3837,6 +3828,7 @@ static int period_size_is_plausible_for_low_latency(int period_size)
     }
 }
 
+#ifdef SND_MONITOR_ENABLED
 static void adev_snd_mon_cb(void *cookie, struct str_parms *parms)
 {
     bool is_snd_card_status = false;
@@ -3870,11 +3862,11 @@ static void adev_snd_mon_cb(void *cookie, struct str_parms *parms)
     pthread_mutex_unlock(&adev->lock);
     return;
 }
+#endif
 
 static int adev_open(const hw_module_t *module, const char *name,
                      hw_device_t **device)
 {
-    int i, ret;
 
     ALOGD("%s: enter", __func__);
     if (strcmp(name, AUDIO_HARDWARE_INTERFACE) != 0) return -EINVAL;
