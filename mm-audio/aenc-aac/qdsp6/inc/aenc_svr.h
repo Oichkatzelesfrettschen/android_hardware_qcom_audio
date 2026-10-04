@@ -33,11 +33,13 @@ extern "C" {
 #endif
 #include <pthread.h>
 #include <sched.h>
-#include <utils/Log.h>
-
 #ifdef _ANDROID_
+#ifndef LOG_TAG
 #define LOG_TAG "QC_AACENC"
 #endif
+#endif
+#include <utils/Log.h>
+
 
 #ifndef LOGE
 #define LOGE ALOGE

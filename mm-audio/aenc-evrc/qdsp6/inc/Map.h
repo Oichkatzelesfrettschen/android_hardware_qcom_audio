@@ -29,6 +29,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _MAP_H_
 
 #include <stdio.h>
+#include <cstdio>
 using namespace std;
 
 template <typename T,typename T2>
@@ -227,7 +228,7 @@ bool Map<T,T2>::eraseall()
            free(tempnode->data);
        if(tempnode->data2)
            free(tempnode->data2);
-           delete tempnode;
+       delete tempnode;
     }
     tail = head = NULL;
     return true;

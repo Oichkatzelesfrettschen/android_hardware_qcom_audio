@@ -30,36 +30,36 @@ int msim_voice_extn_is_call_state_active(struct audio_device *adev,
 int msim_voice_extn_get_active_session_id(struct audio_device *adev,
                                          uint32_t *session_id);
 #else
-static int msim_voice_extn_start_call(struct audio_device *adev __unused)
+static inline int msim_voice_extn_start_call(struct audio_device *adev __unused)
 {
     return -ENOSYS;
 }
 
-static int msim_voice_extn_stop_call(struct audio_device *adev  __unused)
+static inline int msim_voice_extn_stop_call(struct audio_device *adev  __unused)
 {
     return -ENOSYS;
 }
 
-static int msim_voice_extn_get_session_from_use_case(struct audio_device *adev __unused,
+static inline int msim_voice_extn_get_session_from_use_case(struct audio_device *adev __unused,
                                                     const audio_usecase_t usecase_id __unused,
                                                     struct voice_session **session __unused)
 {
     return -ENOSYS;
 }
 
-static int msim_voice_extn_set_parameters(struct audio_device *adev __unused,
+static inline int msim_voice_extn_set_parameters(struct audio_device *adev __unused,
                                          struct str_parms *parms __unused)
 {
     return -ENOSYS;
 }
 
-static int msim_voice_extn_is_call_state_active(struct audio_device *adev __unused,
+static inline int msim_voice_extn_is_call_state_active(struct audio_device *adev __unused,
                                                bool *is_call_active __unused)
 {
     return -ENOSYS;
 }
 
-static int msim_voice_extn_get_active_session_id(struct audio_device *adev __unused,
+static inline int msim_voice_extn_get_active_session_id(struct audio_device *adev __unused,
                                                 uint32_t *session_id __unused)
 {
     return -ENOSYS;

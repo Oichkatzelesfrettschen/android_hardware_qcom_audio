@@ -16,7 +16,7 @@ LOCAL_SRC_FILES:= \
 	effect_api.c
 
 LOCAL_CFLAGS+= -O2 -fvisibility=hidden
-LOCAL_CFLAGS+= -Wno-error
+LOCAL_CFLAGS+= -Wall -Wextra -Werror
 
 LOCAL_SHARED_LIBRARIES := \
 	libcutils \

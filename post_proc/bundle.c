@@ -256,7 +256,6 @@ __attribute__ ((visibility ("default")))
 int offload_effects_bundle_hal_stop_output(audio_io_handle_t output, int pcm_id)
 {
     int ret = -1;
-    struct listnode *node;
     struct listnode *fx_node;
     output_context_t *out_ctxt;
 
@@ -556,7 +555,6 @@ int effect_command(effect_handle_t self, uint32_t cmdCode, uint32_t cmdSize,
 {
 
     effect_context_t * context = (effect_context_t *)self;
-    int retsize;
     int status = 0;
 
     pthread_mutex_lock(&lock);

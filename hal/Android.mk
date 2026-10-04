@@ -35,7 +35,7 @@ LOCAL_SRC_FILES := \
 LOCAL_SRC_FILES += audio_extn/audio_extn.c
 
 LOCAL_CFLAGS += -DUSE_VENDOR_EXTN
-LOCAL_CFLAGS += -Wno-error
+LOCAL_CFLAGS += -Wall -Wextra -Werror
 
 ifeq ($(strip $(AUDIO_FEATURE_ENABLED_ANC_HEADSET)),true)
     LOCAL_CFLAGS += -DANC_HEADSET_ENABLED
