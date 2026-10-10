@@ -426,6 +426,7 @@ static bool is_supported_format(audio_format_t format)
 #ifdef SPEECH_OFFLOAD_ENABLED
     case AUDIO_FORMAT_AMR_NB:
     case AUDIO_FORMAT_AMR_WB:
+    case AUDIO_FORMAT_AMR_WB_PLUS:
     case AUDIO_FORMAT_QCELP:
     case AUDIO_FORMAT_EVRC:
 #endif
@@ -478,6 +479,9 @@ static int get_snd_codec_id(audio_format_t format)
         break;
     case AUDIO_FORMAT_AMR_WB:
         id = SND_AUDIOCODEC_AMRWB;
+        break;
+    case AUDIO_FORMAT_AMR_WB_PLUS:
+        id = SND_AUDIOCODEC_AMRWBPLUS;
         break;
     case AUDIO_FORMAT_QCELP:
         id = SND_AUDIOCODEC_QCELP;
