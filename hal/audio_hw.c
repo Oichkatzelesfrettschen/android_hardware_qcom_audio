@@ -423,6 +423,12 @@ static bool is_supported_format(audio_format_t format)
 #ifdef MP2_OFFLOAD_ENABLED
     case AUDIO_FORMAT_MP2:
 #endif
+#ifdef SPEECH_OFFLOAD_ENABLED
+    case AUDIO_FORMAT_AMR_NB:
+    case AUDIO_FORMAT_AMR_WB:
+    case AUDIO_FORMAT_QCELP:
+    case AUDIO_FORMAT_EVRC:
+#endif
     case AUDIO_FORMAT_AAC_LC:
     case AUDIO_FORMAT_AAC_HE_V1:
     case AUDIO_FORMAT_AAC_HE_V2:
@@ -464,6 +470,20 @@ static int get_snd_codec_id(audio_format_t format)
 #ifdef MP2_OFFLOAD_ENABLED
     case AUDIO_FORMAT_MP2:
         id = SND_AUDIOCODEC_MP2;
+        break;
+#endif
+#ifdef SPEECH_OFFLOAD_ENABLED
+    case AUDIO_FORMAT_AMR_NB:
+        id = SND_AUDIOCODEC_AMR;
+        break;
+    case AUDIO_FORMAT_AMR_WB:
+        id = SND_AUDIOCODEC_AMRWB;
+        break;
+    case AUDIO_FORMAT_QCELP:
+        id = SND_AUDIOCODEC_QCELP;
+        break;
+    case AUDIO_FORMAT_EVRC:
+        id = SND_AUDIOCODEC_EVRC;
         break;
 #endif
     default:
