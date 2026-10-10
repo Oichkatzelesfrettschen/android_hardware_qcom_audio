@@ -3062,6 +3062,16 @@ static int adev_open_output_stream(struct audio_hw_device *dev,
             out->compr_config.codec->format = SNDRV_PCM_FORMAT_S24_3LE;
         if (config->offload_info.format == AUDIO_FORMAT_PCM_8_24_BIT)
             out->compr_config.codec->format = SNDRV_PCM_FORMAT_S24_LE;
+#ifdef HIFI_AUDIO_ENABLED
+        /* A DIRECT PCM output leaves offload_info.bit_width at its 16-bit
+         * initializer, so the sample width comes from the stream format; it
+         * selects the 24-bit codec backend through
+         * platform_check_and_set_codec_backend_cfg(). */
+        if (!(out->flags & AUDIO_OUTPUT_FLAG_COMPRESS_OFFLOAD) &&
+            (config->offload_info.format == AUDIO_FORMAT_PCM_24_BIT_PACKED ||
+             config->offload_info.format == AUDIO_FORMAT_PCM_8_24_BIT))
+            out->bit_width = 24;
+#endif
 
 #ifdef FLAC_OFFLOAD_ENABLED
         if (config->offload_info.format == AUDIO_FORMAT_FLAC)
