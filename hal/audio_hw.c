@@ -423,6 +423,13 @@ static bool is_supported_format(audio_format_t format)
 #ifdef MP2_OFFLOAD_ENABLED
     case AUDIO_FORMAT_MP2:
 #endif
+#ifdef SPEECH_OFFLOAD_ENABLED
+    case AUDIO_FORMAT_AMR_NB:
+    case AUDIO_FORMAT_AMR_WB:
+    case AUDIO_FORMAT_AMR_WB_PLUS:
+    case AUDIO_FORMAT_QCELP:
+    case AUDIO_FORMAT_EVRC:
+#endif
     case AUDIO_FORMAT_AAC_LC:
     case AUDIO_FORMAT_AAC_HE_V1:
     case AUDIO_FORMAT_AAC_HE_V2:
@@ -464,6 +471,23 @@ static int get_snd_codec_id(audio_format_t format)
 #ifdef MP2_OFFLOAD_ENABLED
     case AUDIO_FORMAT_MP2:
         id = SND_AUDIOCODEC_MP2;
+        break;
+#endif
+#ifdef SPEECH_OFFLOAD_ENABLED
+    case AUDIO_FORMAT_AMR_NB:
+        id = SND_AUDIOCODEC_AMR;
+        break;
+    case AUDIO_FORMAT_AMR_WB:
+        id = SND_AUDIOCODEC_AMRWB;
+        break;
+    case AUDIO_FORMAT_AMR_WB_PLUS:
+        id = SND_AUDIOCODEC_AMRWBPLUS;
+        break;
+    case AUDIO_FORMAT_QCELP:
+        id = SND_AUDIOCODEC_QCELP;
+        break;
+    case AUDIO_FORMAT_EVRC:
+        id = SND_AUDIOCODEC_EVRC;
         break;
 #endif
     default:
@@ -3042,6 +3066,16 @@ static int adev_open_output_stream(struct audio_hw_device *dev,
             out->compr_config.codec->format = SNDRV_PCM_FORMAT_S24_3LE;
         if (config->offload_info.format == AUDIO_FORMAT_PCM_8_24_BIT)
             out->compr_config.codec->format = SNDRV_PCM_FORMAT_S24_LE;
+#ifdef HIFI_AUDIO_ENABLED
+        /* A DIRECT PCM output leaves offload_info.bit_width at its 16-bit
+         * initializer, so the sample width comes from the stream format; it
+         * selects the 24-bit codec backend through
+         * platform_check_and_set_codec_backend_cfg(). */
+        if (!(out->flags & AUDIO_OUTPUT_FLAG_COMPRESS_OFFLOAD) &&
+            (config->offload_info.format == AUDIO_FORMAT_PCM_24_BIT_PACKED ||
+             config->offload_info.format == AUDIO_FORMAT_PCM_8_24_BIT))
+            out->bit_width = 24;
+#endif
 
 #ifdef FLAC_OFFLOAD_ENABLED
         if (config->offload_info.format == AUDIO_FORMAT_FLAC)

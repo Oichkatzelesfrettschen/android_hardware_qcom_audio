@@ -232,8 +232,15 @@ enum {
 #endif
 #endif
 
-// for DIRECT_PCM
+// for DIRECT_PCM: the second msm-compress-dsp front end. On PLATFORM_MSM8x26
+// that is the "msm8226 Compr2" link, PCM device 20; device 17 is VoLTE there.
+#ifndef PLAYBACK_OFFLOAD_DEVICE2
+#ifdef PLATFORM_MSM8x26
+#define PLAYBACK_OFFLOAD_DEVICE2 20
+#else
 #define PLAYBACK_OFFLOAD_DEVICE2 17
+#endif
+#endif
 
 #define COMPRESS_VOIP_CALL_PCM_DEVICE 3
 
